@@ -47,11 +47,14 @@ museClass.prototype.init = function() {
     var child = spawn('muse-io', ['--osc','osc.udp://localhost:5001,osc.udp://localhost:5002']);
 
     child.stdout.on('data', function(data) {
+
+        var buff = new Buffer(data);
+        console.log("foo: " + buff.toString('utf8'));
+
+        completeString += buff.toString('utf8');
         // All we want to know is whether the device is connected or not
-        if(completeString.indexOf("Connected.") > -1) {
+        if(completeString.indexOf("Connected") > -1) {
             this.emit('connected');
-        } else {
-            console.log(data.toString());
         }
     });
 
