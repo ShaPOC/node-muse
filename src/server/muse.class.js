@@ -26,12 +26,11 @@ var spawn = require('child_process').spawn,
  | default options above with the parameters in the 'constructor'
  |
  */
-var museClass = function() {};
+var museClass = function() {
+    this.completeString = "";
+};
 // Inherit the eventemitter super class
 util.inherits(museClass, EventEmitter);
-// Complete string gathered from chunks is saved up until the point that
-// A connection is made
-var completeString = "";
 
 /*
  |--------------------------------------------------------------------------
@@ -44,13 +43,14 @@ var completeString = "";
  */
 museClass.prototype.init = function() {
 
-    var child = spawn('muse-io', ['--osc','osc.udp://localhost:5001,osc.udp://localhost:5002']);
+    var child = spawn('muse-io', ['--osc','osc.udp://localhost:5001,osc.udp://localhost:5002']),
+        self = this;
 
     child.stdout.on('data', function(data) {
 
-        completeString += data.toString('utf8');
+        self.completeString += data.toString('utf8');
         // All we want to know is whether the device is connected or not
-        if(completeString.toString().indexOf("Connected") != -1) {
+        if(self.completeString.indexOf("Connected") != -1) {
             this.emit('connected');
         }
     });
