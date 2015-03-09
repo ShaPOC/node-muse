@@ -50,7 +50,7 @@ museClass.prototype.init = function() {
 
         completeString += data.toString('utf8');
         // All we want to know is whether the device is connected or not
-        if(completeString.toString().indexOf("Connected") > -1) {
+        if(completeString.toString().indexOf("Connected") != -1) {
             this.emit('connected');
         }
     });
