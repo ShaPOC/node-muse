@@ -49,16 +49,18 @@ museClass.prototype.init = function() {
     child.stdout.on('data', function(data) {
 
         self.completeString += data.toString('utf8');
-        console.log(self.completeString);
         // All we want to know is whether the device is connected or not
         if(self.completeString.indexOf("Connected") != -1) {
-            console.log("shit got connected!");
-            this.emit('connected');
+            self.emit('connected');
         }
     });
 
     child.stderr.on('data', function(data) {
         // TODO: catch errors
+    });
+
+    child.on('close', function(data) {
+        self.init();
     });
 };
 
