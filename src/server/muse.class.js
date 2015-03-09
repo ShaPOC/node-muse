@@ -27,7 +27,9 @@ var spawn = require('child_process').spawn,
  |
  */
 var museClass = function() {
+
     this.completeString = "";
+    this.connected = false;
 };
 // Inherit the eventemitter super class
 util.inherits(museClass, EventEmitter);
@@ -41,25 +43,36 @@ util.inherits(museClass, EventEmitter);
  | some listeners to this class using the watch prototype method.
  |
  */
-museClass.prototype.init = function() {
+museClass.prototype.init = function(options) {
 
-    var child = spawn('muse-io', ['--osc','osc.udp://localhost:5001,osc.udp://localhost:5002']),
+    var child = spawn('muse-io', ['--osc','osc.udp://' + options.host + ':' + options.port]),
         self = this;
 
     child.stdout.on('data', function(data) {
 
+        // It's already connected so don't bother doing anything else for now
+        if(self.connected) {
+            return false;
+        }
+
         self.completeString += data.toString('utf8');
         // All we want to know is whether the device is connected or not
         if(self.completeString.indexOf("Connected") != -1) {
-            self.emit('connected');
+            // Empty our buffer
+            self.completeString = null;
+            // Send out a connected notice!
+            self.emit('connected', options);
         }
     });
 
     child.stderr.on('data', function(data) {
         // TODO: catch errors
+        console.log(data);
     });
 
+    // On unexpected close
     child.on('close', function(data) {
+        // Restart the server!
         self.init();
     });
 };

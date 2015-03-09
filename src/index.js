@@ -1,10 +1,20 @@
-var museClass = require(__dirname + "/server/muse.class");
-var muse = new museClass();
+// Test server
 
-muse.on('connected', function(){
-    console.log("It's connected!");
+var museClass = require(__dirname + "/server/muse.class"),
+    oscClass = require(__dirname + "/server/osc.class"),
+    muse = new museClass(),
+    osc = new oscClass();
+
+
+muse.on('connected', function(options){
+
+    // Start the osc
+    osc.init(options);
 });
 
-muse.init();
+muse.init({
+    host: "localhost",
+    port: "5002"
+});
 
 //require(__dirname + "/server/http");
