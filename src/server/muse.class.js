@@ -48,12 +48,9 @@ museClass.prototype.init = function() {
 
     child.stdout.on('data', function(data) {
 
-        var buff = new Buffer(data);
-        console.log("foo: " + buff.toString('utf8'));
-
-        completeString += buff.toString('utf8');
+        completeString += data.toString('utf8');
         // All we want to know is whether the device is connected or not
-        if(completeString.indexOf("Connected") > -1) {
+        if(completeString.toString().indexOf("Connected") > -1) {
             this.emit('connected');
         }
     });
