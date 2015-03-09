@@ -1,0 +1,28 @@
+{
+  "name": "node-muse",
+  "version": "0.0.1",
+  "description": "The unofficial GUI and OSC message receiver for the Muse Brainwave Band made with Node.JS",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShaPOC/node-muse.git"
+  },
+  "keywords": [
+    "Muse",
+    "OSC",
+    "Neuro",
+    "Headband"
+  ],
+  "author": "Jimmy Aupperlee <j.aup.gt@gmail.com>",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/ShaPOC/node-muse/issues"
+  },
+  "homepage": "https://github.com/ShaPOC/node-muse",
+  "dependencies": {
+    "osc": "^1.1.0"
+  }
+}

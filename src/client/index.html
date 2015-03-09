@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Muse GUI</title>
+    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost:8080');
+        socket.on('news', function (data) {
+            console.log(data);
+        });
+    </script>
+</head>
+<body>
+
+</body>
+</html>
