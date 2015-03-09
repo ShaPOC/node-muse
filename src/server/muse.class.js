@@ -29,6 +29,9 @@ var spawn = require('child_process').spawn,
 var museClass = function() {};
 // Inherit the eventemitter super class
 util.inherits(museClass, EventEmitter);
+// Complete string gathered from chunks is saved up until the point that
+// A connection is made
+var completeString = "";
 
 /*
  |--------------------------------------------------------------------------
@@ -44,8 +47,10 @@ museClass.prototype.init = function() {
     var child = spawn('muse-io', ['--osc','osc.udp://localhost:5001,osc.udp://localhost:5002']);
 
     child.stdout.on('data', function(data) {
+        console.log(data.toString());
+        completeString += data.toString();
         // All we want to know is whether the device is connected or not
-        if(data.toString().indexOf("Connected") > -1) {
+        if(completeString.indexOf("Connected") > -1) {
             this.emit('connected');
         }
     });
