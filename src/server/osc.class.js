@@ -28,7 +28,7 @@ var osc = require('osc'),
  */
 var oscClass = function() {
     // Set some defaults
-    this.host = "localhost";
+    this.host = "0.0.0.0";
     this.port = 5002;
 };
 // Inherit the eventemitter super class
@@ -43,9 +43,9 @@ util.inherits(oscClass, EventEmitter);
  |
  */
 oscClass.prototype.init = function(options) {
-
-    this.host = options.host;
-    this.port = options.port;
+    //
+    //this.host = options.host;
+    //this.port = options.port;
 
     // Create an osc.js UDP connection
     var udpPort = new osc.UDPPort({
