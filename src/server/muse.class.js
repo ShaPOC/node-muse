@@ -28,11 +28,50 @@ var spawn = require('child_process').spawn,
  */
 var museClass = function() {
 
-    this.completeString = "";
     this.connected = false;
+    this.config = null;
 };
 // Inherit the eventemitter super class
 util.inherits(museClass, EventEmitter);
+
+/*
+ |--------------------------------------------------------------------------
+ | Set data
+ |--------------------------------------------------------------------------
+ |
+ | This method filters incoming data and makes it readable to the outside
+ | world receiving it through the appropriate listener events.
+ | 
+ | E.G. dataobject = {
+ |         path = /muse/elements/low_freqs_absoulte
+ |         raw = ffff
+ |         value = 56
+ |         address = '127.0.0.1'
+ |         port = 50502
+ |         family = 'IPv4'
+ |      }
+ |
+ | E.G. the above object will be received through the
+ | muse.on('/muse/elements/low_freqs_absoulte', function(dataobject) method
+ */
+museClass.prototype.setData = function(data, info, raw) {
+
+    if(data.address === "/muse/config") {
+        this.config = eval('(' + data.args + ')');
+        return true;
+    }
+
+    // Emit the event
+    this.emit(data.address, {
+        path : data.address,
+        values : data.args,
+        size : info.size,
+        address : info.address,
+        port : info.port,
+        family : info.family,
+        raw: raw
+    });
+};
 
 /*
  |--------------------------------------------------------------------------
@@ -45,21 +84,31 @@ util.inherits(museClass, EventEmitter);
  */
 museClass.prototype.init = function(options) {
 
-    var child = spawn('muse-io', ['--osc','osc.udp://' + options.host + ':' + options.port]),
+    var connectionString = 'osc.udp://' + options.host + ':' + options.port,
+        child = spawn('muse-io', ['--osc', connectionString ]),
         self = this;
+
+    console.log("Connecting to any available Muse using host; " + connectionString);
 
     child.stdout.on('data', function(data) {
 
-        // It's already connected so don't bother doing anything else for now
+        // It's already connected so don't bother doing anything else but
+        // check for a disconnect
         if(self.connected) {
+            if(data.toString('utf8').indexOf('failure') > -1) {
+                self.connected = false;
+                 // Send out a message
+                console.log("The Muse got disconnected!");
+                self.emit('disconnected');
+            }
             return false;
         }
 
-        self.completeString += data.toString('utf8');
         // All we want to know is whether the device is connected or not
-        if(self.completeString.indexOf("Connected") != -1) {
-            // Empty our buffer
-            self.completeString = null;
+        if(data.toString('utf8').indexOf("Connected") > -1) {
+            self.connected = true;
+            // Send out a message
+            console.log("Succesfully connected to the Muse!");
             // Send out a connected notice!
             self.emit('connected', options);
         }
@@ -72,8 +121,10 @@ museClass.prototype.init = function(options) {
 
     // On unexpected close
     child.on('close', function(data) {
-        // Restart the server!
-        self.init();
+        // TODO: Catch unexpected close
+        console.log(data);
+        // Restart the server?
+        // self.init();
     });
 };
 
