@@ -10,6 +10,42 @@ body {
         margin-right: 0px;
     }
 }
+
+body #connection_buttons .btn {
+    display: none;
+}
+body.connected #connection_buttons #connected_button {
+    display: inline-block;
+}
+body.uncertain #connection_buttons #connection_uncertain_button {
+    display: inline-block;
+}
+body.disconnected #connection_buttons #not_connected_button {
+    display: inline-block;
+}
+.jumbotron-contents {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.jumbotron-contents {
+    -webkit-transition: color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
+    transition: color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
+}
+.progress-bar-success {
+    -webkit-transition:  width 500ms ease-in-out, color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
+    transition: width 500ms ease-in-out,color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
+}
+
+.excellent .jumbotron-contents {
+    background: #8cc152 !important;
+    color: #fff !important;
+}
+.excellent .progress-bar-success {
+    background-color: #fff !important;
+}
+
 .spin {
     -webkit-animation: spin 1000ms infinite linear;
     animation: spin 1000ms infinite linear;

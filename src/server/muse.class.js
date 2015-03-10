@@ -29,6 +29,7 @@ var spawn        = require('child_process').spawn,
 var museClass = function() {
 
     this.connected = false;
+    this.uncertain = false;
     this.config = null;
 };
 // Inherit the eventemitter super class
@@ -95,6 +96,14 @@ museClass.prototype.init = function(options) {
         // It's already connected so don't bother doing anything else but
         // check for a disconnect
         if(self.connected) {
+
+            if(data.toString('utf8').indexOf('bits/second: 0') > -1 && !this.uncertain) {
+                this.uncertain = true;
+                self.emit('uncertain');
+            } else {
+                this.uncertain = false;
+            }
+
             if(data.toString('utf8').indexOf('failure') > -1) {
                 self.connected = false;
                  // Send out a message
