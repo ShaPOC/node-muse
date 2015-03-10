@@ -3,15 +3,60 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Muse GUI</title>
-    <script src="http://localhost:8080/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io.connect('http://localhost:8080');
-        socket.on('news', function (data) {
-            console.log(data);
-        });
-    </script>
+
+    <link type="text/css" rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="vendor/bootflat/css/bootflat.min.css">
+    <link type="text/css" rel="stylesheet" href="vendor/ionicons/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/base.css">
+
+    <script type="text/javascript" src="vendor/jquery/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="vendor/bootflat/js/icheck.min.js"></script>
+    <script type="text/javascript" src="vendor/bootflat/js/jquery.fs.selecter.min.js"></script>
+    <script type="text/javascript" src="vendor/bootflat/js/jquery.fs.stepper.min.js"></script>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="lib/socket.js"></script>
+
 </head>
 <body>
+
+<div class="container">
+
+    <header class="row">
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Node Muse</a>
+                </div>
+                <div class="navbar-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn navbar-btn btn-danger dropdown-toggle" data-toggle="dropdown">Not connected <span class="caret"></span></button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li class="disabled"><a href="#"><i class="ion-load-c spin"></i> Searching for device...</a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="hidden btn navbar-btn btn-success dropdown-toggle" data-toggle="dropdown">Connected <span class="caret"></span></button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Stuff will be cool here soon...</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="row">
+        <div class="col-md-6">
+
+        </div>
+        <div class="col-md-6">
+
+        </div>
+    </section>
+
+</div>
 
 </body>
 </html>

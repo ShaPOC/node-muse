@@ -13,8 +13,8 @@
  |--------------------------------------------------------------------------
  */
 
-var spawn = require('child_process').spawn,
-    util = require('util'),
+var spawn        = require('child_process').spawn,
+    util         = require('util'),
     EventEmitter = require('events').EventEmitter;
 
 /*

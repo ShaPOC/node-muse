@@ -13,8 +13,8 @@
  |--------------------------------------------------------------------------
  */
 
-var osc = require('osc'),
-    util = require('util'),
+var osc          = require('osc'),
+    util         = require('util'),
     EventEmitter = require('events').EventEmitter;
 
 /*
