@@ -131,21 +131,30 @@ webClass.prototype.setDefaultListeners = function() {
     var self = this;
 
     // Loop through to delete
-    if(this.museDataPathsRequested[id]) {
-        for(var x in this.museDataPathsRequested[id]["paths"]) {
-            this.muse.removeListener(x, this.museDataPathsRequested[id]["paths"][x]);
+    if(self.museDataPathsRequested[id]) {
+        for(var x in self.museDataPathsRequested[id]["paths"]) {
+            self.muse.removeListener(x, self.museDataPathsRequested[id]["paths"][x]);
         }
     }
 
-    this.museDataPathsRequested[id]["paths"] = {};
+    // If it got disconnected or doesn't want data anymore, then we can
+    // stop here and remove the connection
+    if(arr.length == 0) {
+        delete self.museDataPathsRequested[id];
+        return false;
+    }
+
+    self.museDataPathsRequested[id]["paths"] = {};
 
     // Now add the new ones
     for(var path in arr) {
-        this.museDataPathsRequested[id]["paths"][arr[path]] = function(object){
-            self.museDataPathsRequested[id]["socket"].emit(arr[path], object);
-        }
+        self.museDataPathsRequested[id]["paths"][arr[path]] = (function() {
+            return function(object) {
+                self.museDataPathsRequested[id]["socket"].emit(object.path, object);
+            }
+        })();
         // Set the listener in the muse class
-        this.muse.on(arr[path], this.museDataPathsRequested[id]["paths"][arr[path]]);
+        self.muse.on(arr[path], self.museDataPathsRequested[id]["paths"][arr[path]]);
     }
  };
 

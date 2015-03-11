@@ -9,9 +9,17 @@ function setState(state) {
 	$("body").addClass(state);
 };
 
+function setFlow() {
+	
+}
+
+function createFlot() {
+
+}
+
 var table = {},
     jTable = null,
-    columns = 6;
+    columns = 8;
 
 function setTableValue(path, values) {
 
@@ -21,17 +29,22 @@ function setTableValue(path, values) {
 
     for (var title in values) {
 
-        if(!table[path + '_' + count]) {
+        if(typeof table[path + '_' + count] == "undefined") {
             // Always used
-            var the_column = '<td id=' + path + '_' + count + ' data-toggle="tooltip" data-placement="top" data-original-title="' + title + '">' + values[title] + '</td>';
+            var the_column = '<td id=' + path + '_' + count + '><button class="btn btn-default btn-block" data-toggle="tooltip" data-placement="top" data-original-title="' + title + '">' + parseFloat(values[title]).toFixed(2); values[title] + '</button></td>';
             // We just have to catch whether to make a new row
             if(jTable.children("tr").length <= 0 || jTable.children("tr").last().children("td").length >= columns) {
-                table[path + '_' + count] = jTable.append('<tr>' + the_row + '</tr>');
+                table[path + '_' + count] = jTable.append('<tr>' + the_column + '</tr>').children("tr").last().children("td").last();
             } else {
-                table[path + '_' + count] = jTable.children("tr").last().append(the_column);
+                table[path + '_' + count] = jTable.children("tr").last().append(the_column).children("td").last();
             }
+            // Enable tooltips
+			$(table[path + '_' + count]).children("button").tooltip();
+			$(table[path + '_' + count]).children("button").off("click").on("click", function(){
+
+			});
         } else {
-            table[path + '_' + count].text(values[title]);
+            table[path + '_' + count].children("button").text(parseFloat(values[title]).toFixed(2));
         }
 
         count ++;
@@ -59,6 +72,7 @@ socket.on('disconnect', function(){
 
 socket.on('connected', function (data) {
 	if( data.connected ) setState("connected");
+	$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
 });
 
 /**
@@ -84,9 +98,9 @@ socket.on('/muse/elements/horseshoe', function(data){
 });
 
 // Get the battery value
-socket.on('/muse/bat', function(data){
-
-    $("#battery i").attr("data-percentage", Math.round(data.values[0] / 100));
+socket.on('/muse/batt', function(data){
+	// Set percentage values
+    $("#battery i").attr("data-percentage", Math.round(data.values[0] / 100)).parent().attr("data-percentage",  Math.round(data.values[0] / 100));
 
 });
 
@@ -94,10 +108,21 @@ socket.on('/muse/bat', function(data){
 socket.on('/muse/eeg', function(data){
 
     setTableValue(data.path, {
-        'Left Ear' : data.values[0],
-        'Left Forehead' : data.values[1],
-        'Right Forehead' : data.values[2],
-        'Right Ear' : data.values[3]
+        'EEG: Left Ear' : data.values[0],
+        'EEG: Left Forehead' : data.values[1],
+        'EEG: Right Forehead' : data.values[2],
+        'EEG: Right Ear' : data.values[3]
+    });
+
+});
+
+// Get ACC values
+socket.on('/muse/acc', function(data){
+
+    setTableValue(data.path, {
+        'Accelerometer: Forward and backward position' : data.values[0],
+        'Accelerometer: Up and down position' : data.values[1],
+        'Accelerometer: Left and right position' : data.values[2],
     });
 
 });
@@ -105,11 +130,9 @@ socket.on('/muse/eeg', function(data){
 // Now ask for all the data
 socket.emit('setPaths',
     [
+    	'/muse/acc',
+        '/muse/eeg',
         '/muse/batt',
         '/muse/elements/horseshoe',
-        '/muse/eeg'
     ]
 );
-
-// Enable tooltips
-$('[data-toggle="tooltip"]').tooltip();

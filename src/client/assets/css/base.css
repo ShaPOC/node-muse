@@ -34,6 +34,17 @@ body.disconnected #connection_buttons #not_connected_button {
     border-radius: 5px;
 }
 
+table#raw-table {
+    margin: 0px;
+}
+table#raw-table tbody tr td {
+    text-align: center;
+    position: relative;
+}
+table#raw-table tbody tr td button {
+    width: 100px;
+}
+
 .jumbotron-contents {
     -webkit-transition: color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
     transition: color 500ms 500ms ease-in-out, background 500ms 500ms ease-in-out;
@@ -61,7 +72,7 @@ body.disconnected #connection_buttons #not_connected_button {
 #battery i:after {
     position: absolute;
     content: attr(data-percentage);
-    top: 15px;
+    top: 14px;
     left: 4px;
     width: 18px;
     text-align: center;
