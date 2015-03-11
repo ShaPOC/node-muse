@@ -9,19 +9,56 @@ function setState(state) {
 	$("body").addClass(state);
 };
 
-function setFlow() {
-	
+var enabledFlots = {};
+
+function createFlot(path, min, max) {
+
+    $("#flots").append("<div id='" + path + "'></div>");
+    return $.plot("#" + path, [], {
+        series: {
+            shadowSize: 0	// Drawing is faster without shadows
+        },
+        yaxis: {
+            min: min || 0,
+            max: max || 2000
+        },
+        xaxis: {
+            show: false
+        }
+    });
 }
 
-function createFlot() {
+function destroyFlot(path) {
+    $("div#" + path).remove();
+}
 
+function setFlot(path, enabled, min, max) {
+
+    if(enabled == null) enabled = true;
+
+    if(enabled && (enabledFlots[path] == null || !enabledFlots[path])) {
+        enabledFlots[path] = createFlot(path, min, max);
+    }
+
+    if(!enabled && enabledFlots[path]) {
+        destroyFlot(path);
+    }
+}
+
+function setFlotData(path, data) {
+
+    if( enabledFlots[path] != null && enabledFlots[path] ) {
+
+        enabledFlots[paths].setData([ data ]);
+        enabledFlots[paths].draw();
+    }
 }
 
 var table = {},
     jTable = null,
     columns = 8;
 
-function setTableValue(path, values) {
+function setTableValue(path, value, min, max) {
 
     if(jTable == null) jTable = $("table#raw-table tbody");
 
@@ -29,22 +66,32 @@ function setTableValue(path, values) {
 
     for (var title in values) {
 
-        if(typeof table[path + '_' + count] == "undefined") {
+        // Add the counter
+        path = path + '_' + count;
+
+        if(typeof table[path] == "undefined") {
             // Always used
-            var the_column = '<td id=' + path + '_' + count + '><button class="btn btn-default btn-block" data-toggle="tooltip" data-placement="top" data-original-title="' + title + '">' + parseFloat(values[title]).toFixed(2); values[title] + '</button></td>';
+            var the_column = '<td id=' + path + '><button class="btn btn-default btn-block" data-toggle="tooltip" data-placement="top" data-original-title="' + title + '">' + parseFloat(values[title]).toFixed(2); values[title] + '</button></td>';
             // We just have to catch whether to make a new row
             if(jTable.children("tr").length <= 0 || jTable.children("tr").last().children("td").length >= columns) {
-                table[path + '_' + count] = jTable.append('<tr>' + the_column + '</tr>').children("tr").last().children("td").last();
+                table[path] = jTable.append('<tr>' + the_column + '</tr>').children("tr").last().children("td").last();
             } else {
-                table[path + '_' + count] = jTable.children("tr").last().append(the_column).children("td").last();
+                table[path] = jTable.children("tr").last().append(the_column).children("td").last();
             }
             // Enable tooltips
-			$(table[path + '_' + count]).children("button").tooltip();
-			$(table[path + '_' + count]).children("button").off("click").on("click", function(){
-
+			$(table[path]).children("button").tooltip();
+			$(table[path]).children("button").off("click").on("click", function(){
+                if($(this).hasClass('btn-default')) {
+                    $(this).removeClass("btn-default").addClass("btn-success");
+                    setFlot(path, true, min ,max);
+                } else {
+                    $(this).removeClass("btn-success").addClass("btn-default");
+                    setFlot(path, false, min ,max);
+                }
 			});
         } else {
-            table[path + '_' + count].children("button").text(parseFloat(values[title]).toFixed(2));
+            table[path].children("button").text(parseFloat(values[title]).toFixed(2));
+            setFlotData(path, parseFloat(values[title]).toFixed(2));
         }
 
         count ++;
@@ -112,7 +159,7 @@ socket.on('/muse/eeg', function(data){
         'EEG: Left Forehead' : data.values[1],
         'EEG: Right Forehead' : data.values[2],
         'EEG: Right Ear' : data.values[3]
-    });
+    }, 0, 1683);
 
 });
 
@@ -123,7 +170,7 @@ socket.on('/muse/acc', function(data){
         'Accelerometer: Forward and backward position' : data.values[0],
         'Accelerometer: Up and down position' : data.values[1],
         'Accelerometer: Left and right position' : data.values[2],
-    });
+    }, -512, 512);
 
 });
 
