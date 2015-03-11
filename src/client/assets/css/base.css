@@ -11,6 +11,11 @@ body {
     }
 }
 
+body.disconnected .hidden-on-disconnected {
+    display: none;
+}
+
+
 body #connection_buttons .btn {
     display: none;
 }
@@ -44,6 +49,23 @@ body.disconnected #connection_buttons #not_connected_button {
 }
 .excellent .progress-bar-success {
     background-color: #fff !important;
+}
+
+#battery {
+    margin: 0px;
+}
+#battery i {
+    font-size: 26pt;
+    position: relative;
+}
+#battery i:after {
+    position: absolute;
+    content: attr(data-percentage);
+    top: 15px;
+    left: 4px;
+    width: 18px;
+    text-align: center;
+    font-size: 7pt;
 }
 
 .spin {
