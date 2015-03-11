@@ -15,7 +15,6 @@ body.disconnected .hidden-on-disconnected {
     display: none;
 }
 
-
 body #connection_buttons .btn {
     display: none;
 }
@@ -60,6 +59,11 @@ table#raw-table tbody tr td button {
 }
 .excellent .progress-bar-success {
     background-color: #fff !important;
+}
+
+.flot {
+    width: 100%;
+    height: 250px;
 }
 
 #battery {

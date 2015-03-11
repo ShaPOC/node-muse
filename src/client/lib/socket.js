@@ -13,8 +13,14 @@ var enabledFlots = {};
 
 function createFlot(path, min, max) {
 
-    $("#flots").append("<div id='" + path + "'></div>");
-    return $.plot("#" + path, [], {
+    enabledFlots[path] = {
+    	"element" : $("#flots")
+        .append("<div class='col-md-6'><div class='flot' id='" + path + "'></div></div>")
+        .children("div").last().children("div"),
+        "data" : []
+    }
+
+    enabledFlots[path]["flot"] = $.plot(enabledFlots[path].element, enabledFlots[path].data, {
         series: {
             shadowSize: 0	// Drawing is faster without shadows
         },
@@ -29,7 +35,9 @@ function createFlot(path, min, max) {
 }
 
 function destroyFlot(path) {
-    $("div#" + path).remove();
+    enabledFlots[path].flot.destroy();
+    enabledFlots[path].element.parent().remove();
+    delete enabledFlots[path];
 }
 
 function setFlot(path, enabled, min, max) {
@@ -37,7 +45,7 @@ function setFlot(path, enabled, min, max) {
     if(enabled == null) enabled = true;
 
     if(enabled && (enabledFlots[path] == null || !enabledFlots[path])) {
-        enabledFlots[path] = createFlot(path, min, max);
+        createFlot(path, min, max);
     }
 
     if(!enabled && enabledFlots[path]) {
@@ -49,8 +57,9 @@ function setFlotData(path, data) {
 
     if( enabledFlots[path] != null && enabledFlots[path] ) {
 
-        enabledFlots[paths].setData([ data ]);
-        enabledFlots[paths].draw();
+        enabledFlots[path]["data"].push(data);
+        enabledFlots[path]["flot"].setData(enabledFlots[path]["data"]);
+        enabledFlots[path]["flot"].draw();
     }
 }
 
@@ -58,7 +67,7 @@ var table = {},
     jTable = null,
     columns = 8;
 
-function setTableValue(path, value, min, max) {
+function setTableValue(opath, values, min, max) {
 
     if(jTable == null) jTable = $("table#raw-table tbody");
 
@@ -67,7 +76,7 @@ function setTableValue(path, value, min, max) {
     for (var title in values) {
 
         // Add the counter
-        path = path + '_' + count;
+        path = opath + '_' + count;
 
         if(typeof table[path] == "undefined") {
             // Always used
@@ -103,6 +112,7 @@ function setTableValue(path, value, min, max) {
  */
 socket.on('muse_connected', function(data){
 	setState("connected");
+	$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
 });
 
 socket.on('muse_uncertain', function(){
@@ -118,8 +128,10 @@ socket.on('disconnect', function(){
 });
 
 socket.on('connected', function (data) {
-	if( data.connected ) setState("connected");
-	$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
+	if( data.connected ) {
+		setState("connected");
+		$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
+	}
 });
 
 /**
