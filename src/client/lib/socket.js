@@ -1,3 +1,14 @@
+/**
+ * Quick settings
+ */
+
+// Minimum update interval for the charts
+var update_interval = 200
+
+/**
+ * Required modules
+ */
+
 var socket = io.connect('http://localhost:8080');
 
 /**
@@ -9,65 +20,123 @@ function setState(state) {
 	$("body").addClass(state);
 };
 
-var enabledFlots = {};
+var enabledCharts = {};
 
-function createFlot(path, min, max) {
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
 
-    enabledFlots[path] = {
-    	"element" : $("#flots")
-        .append("<div class='col-md-6'><div class='flot' id='" + path + "'></div></div>")
-        .children("div").last().children("div"),
-        "data" : []
+function requestChartData(elem) {
+
+    var container = $(elem.target.container);
+
+    // If the chart was deleted before the timeout, then stop everything
+    if(elem == null || container.length <= 0) {
+        return false;
     }
 
-    enabledFlots[path]["flot"] = $.plot(enabledFlots[path].element, enabledFlots[path].data, {
-        series: {
-            shadowSize: 0	// Drawing is faster without shadows
-        },
-        yaxis: {
-            min: min || 0,
-            max: max || 2000
-        },
-        xaxis: {
-            show: false
-        }
-    });
+    var path = container.parent().attr("id").replace("_chart", "")
+
+    if(enabledCharts[path] != null) {
+        var series = elem.target.series[0],
+            shift = series.data.length > 20; // shift if the series is longer than 20
+
+        // add the point
+        elem.target.series[0].addPoint([(new Date()).getTime() , parseFloat(enabledCharts[path]["data"])], true, shift);
+    }
+
+     // call it again after interval
+    setTimeout(function(){ requestChartData(elem) }, update_interval); 
 }
 
-function destroyFlot(path) {
-    enabledFlots[path].flot.destroy();
-    enabledFlots[path].element.parent().remove();
-    delete enabledFlots[path];
+function createChart(path, title, data) {
+
+    enabledCharts[path] = {
+    	"element" : $("#charts")
+        .append("<div class='col-md-6'><div class='chart' id='" + path + "_chart'></div></div>")
+        .children("div").last().children("div"),
+        "data" : data,
+        "title" : title
+    }
+
+    enabledCharts[path]["chart"] = new Highcharts.Chart({
+        chart: {
+            renderTo: path + "_chart",
+            defaultSeriesType: 'spline',
+            marginRight: 10,
+            events: {
+                load: requestChartData
+            }
+        },
+        title: {
+            text: title
+        },
+        xAxis: {
+            type: 'datetime',
+            tickPixelInterval: 150
+        },
+        yAxis: {
+            title: {
+                text: 'Value'
+            },
+            plotLines: [{
+                value: 0,
+                width: 2,
+                color: '#8cc152'
+            }]
+        },
+        tooltip: {
+            enabled: false
+        },
+        legend: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        series: [{
+            name: title,
+            data: [{ x: (new Date()).getTime(), y: parseFloat(data)}],
+            marker: {
+		       enabled: false
+		    }
+        }]
+    });      
 }
 
-function setFlot(path, enabled, min, max) {
+function destroyChart(path) {
+    enabledCharts[path].chart.destroy();
+    enabledCharts[path].element.parent().remove();
+    delete enabledCharts[path];
+}
+
+function setChart(path, enabled, title, data) {
 
     if(enabled == null) enabled = true;
 
-    if(enabled && (enabledFlots[path] == null || !enabledFlots[path])) {
-        createFlot(path, min, max);
+    if(enabled && (enabledCharts[path] == null || !enabledCharts[path])) {
+        createChart(path, title, data);
     }
 
-    if(!enabled && enabledFlots[path]) {
-        destroyFlot(path);
+    if(!enabled && enabledCharts[path]) {
+        destroyChart(path);
     }
 }
 
-function setFlotData(path, data) {
+function setChartData(path, data) {
 
-    if( enabledFlots[path] != null && enabledFlots[path] ) {
-
-        enabledFlots[path]["data"].push(data);
-        enabledFlots[path]["flot"].setData(enabledFlots[path]["data"]);
-        enabledFlots[path]["flot"].draw();
+    if( enabledCharts[path] != null && enabledCharts[path] ) {
+        enabledCharts[path]["data"] = data;
     }
 }
 
 var table = {},
     jTable = null,
-    columns = 8;
+    columns = 7;
 
-function setTableValue(opath, values, min, max) {
+function setTableValue(opath, values) {
 
     if(jTable == null) jTable = $("table#raw-table tbody");
 
@@ -92,15 +161,15 @@ function setTableValue(opath, values, min, max) {
 			$(table[path]).children("button").off("click").on("click", function(){
                 if($(this).hasClass('btn-default')) {
                     $(this).removeClass("btn-default").addClass("btn-success");
-                    setFlot(path, true, min ,max);
+                    setChart(path, true, title, parseFloat(values[title]).toFixed(2));
                 } else {
                     $(this).removeClass("btn-success").addClass("btn-default");
-                    setFlot(path, false, min ,max);
+                    setChart(path, false);
                 }
 			});
         } else {
             table[path].children("button").text(parseFloat(values[title]).toFixed(2));
-            setFlotData(path, parseFloat(values[title]).toFixed(2));
+            setChartData(path, parseFloat(values[title]).toFixed(2));
         }
 
         count ++;
@@ -112,7 +181,8 @@ function setTableValue(opath, values, min, max) {
  */
 socket.on('muse_connected', function(data){
 	setState("connected");
-	$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
+	if(data.config != null) 
+        $("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
 });
 
 socket.on('muse_uncertain', function(){
@@ -130,7 +200,8 @@ socket.on('disconnect', function(){
 socket.on('connected', function (data) {
 	if( data.connected ) {
 		setState("connected");
-		$("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
+        if(data.config != null) 
+            $("#battery i").attr("data-percentage", data.config.battery_percent_remaining).parent().attr("data-percentage", data.config.battery_percent_remaining);
 	}
 });
 
@@ -171,7 +242,7 @@ socket.on('/muse/eeg', function(data){
         'EEG: Left Forehead' : data.values[1],
         'EEG: Right Forehead' : data.values[2],
         'EEG: Right Ear' : data.values[3]
-    }, 0, 1683);
+    });
 
 });
 
@@ -182,7 +253,151 @@ socket.on('/muse/acc', function(data){
         'Accelerometer: Forward and backward position' : data.values[0],
         'Accelerometer: Up and down position' : data.values[1],
         'Accelerometer: Left and right position' : data.values[2],
-    }, -512, 512);
+    });
+
+});
+
+socket.on('/muse/elements/blink', function(data){
+
+    setTableValue(data.path, {
+        'Eye blink' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/jaw_clench', function(data){
+
+    setTableValue(data.path, {
+        'Jaw Clench' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/low_freqs_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Low Frequency' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/delta_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Delta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/theta_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Theta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/alpha_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Alpha' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/beta_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Beta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/gamma_absolute', function(data){
+
+    setTableValue(data.path, {
+        'Absolute Band Powers: Gamma' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/delta_relative', function(data){
+
+    setTableValue(data.path, {
+        'Relative Band Powers: Delta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/theta_relative', function(data){
+
+    setTableValue(data.path, {
+        'Relative Band Powers: Theta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/alpha_relative', function(data){
+
+    setTableValue(data.path, {
+        'Relative Band Powers: Alpha' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/beta_relative', function(data){
+
+    setTableValue(data.path, {
+        'Relative Band Powers: Beta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/gamma_relative', function(data){
+
+    setTableValue(data.path, {
+        'Relative Band Powers: Gamma' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/delta_session_score', function(data){
+
+    setTableValue(data.path, {
+        'Band Power Session Score: Delta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/theta_session_score', function(data){
+
+    setTableValue(data.path, {
+        'Band Power Session Score: Theta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/alpha_session_score', function(data){
+
+    setTableValue(data.path, {
+        'Band Power Session Score: Alpha' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/beta_session_score', function(data){
+
+    setTableValue(data.path, {
+        'Band Power Session Score: Beta' : data.values
+    });
+
+});
+
+socket.on('/muse/elements/gamma_session_score', function(data){
+
+    setTableValue(data.path, {
+        'Band Power Session Score: Gamma' : data.values
+    });
 
 });
 
@@ -193,5 +408,23 @@ socket.emit('setPaths',
         '/muse/eeg',
         '/muse/batt',
         '/muse/elements/horseshoe',
+        '/muse/elements/blink',
+        '/muse/elements/jaw_clench',
+        '/muse/elements/low_freqs_absolute',
+        '/muse/elements/delta_absolute',
+        '/muse/elements/theta_absolute',
+        '/muse/elements/alpha_absolute',
+        '/muse/elements/beta_absolute',
+        '/muse/elements/gamma_absolute',
+        '/muse/elements/delta_relative',
+        '/muse/elements/theta_relative',
+        '/muse/elements/alpha_relative',
+        '/muse/elements/beta_relative',
+        '/muse/elements/gamma_relative',
+        '/muse/elements/delta_session_score',
+        '/muse/elements/theta_session_score',
+        '/muse/elements/alpha_session_score',
+        '/muse/elements/beta_session_score',
+        '/muse/elements/gamma_session_score'
     ]
 );
