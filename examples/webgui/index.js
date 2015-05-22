@@ -11,15 +11,15 @@
  */
 
 var webClass  = require( __dirname + "/server/web.class"),
-    muse      = require("node-muse");
-    web       = new webClass(muse);
+    nodeMuse  = require("node-muse");
+    web       = new webClass(nodeMuse.Muse);
 
 /*
  |--------------------------------------------------------------------------
  | Start the muse
  |--------------------------------------------------------------------------
  */
-muse.connect(
+nodeMuse.connect(
     "127.0.0.1",
     "5002"
 );
