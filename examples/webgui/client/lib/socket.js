@@ -3,7 +3,7 @@
  */
 
 // Minimum update interval for the charts
-var update_interval = 200
+var update_interval = 200;
 
 /**
  * Required modules

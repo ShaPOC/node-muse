@@ -1,9 +1,8 @@
 /**
- *
- * OSC 'Prototype Class'
- *
- * @author Jimmy Aupperlee <jimmy@codeprogressive.com>
+ * OSC Prototype Object
+ * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
  */
+
 
 'use strict';
 
@@ -21,10 +20,6 @@ var osc          = require('osc'),
  |--------------------------------------------------------------------------
  | The 'constructor'
  |--------------------------------------------------------------------------
- |
- | Instantiate some variables and use the options object to merge the
- | default options above with the parameters in the 'constructor'
- |
  */
 var oscClass = function() {
     // Set some defaults

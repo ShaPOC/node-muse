@@ -1,9 +1,8 @@
 /**
- *
- * Muse 'Prototype Class'
- *
- * @author Jimmy Aupperlee <jimmy@codeprogressive.com>
+ * Muse Prototype Object
+ * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
  */
+
 
 'use strict';
 
@@ -21,10 +20,6 @@ var spawn        = require('child_process').spawn,
  |--------------------------------------------------------------------------
  | The 'constructor'
  |--------------------------------------------------------------------------
- |
- | Instantiate some variables and use the options object to merge the
- | default options above with the parameters in the 'constructor'
- |
  */
 var museClass = function() {
 
@@ -98,10 +93,10 @@ museClass.prototype.init = function(options) {
         if(self.connected) {
 
             if(data.toString('utf8').indexOf('bits/second: 0') > -1 && !this.uncertain) {
-                this.uncertain = true;
+                self.uncertain = true;
                 self.emit('uncertain');
             } else {
-                this.uncertain = false;
+                self.uncertain = false;
             }
 
             if(data.toString('utf8').indexOf('failure') > -1) {

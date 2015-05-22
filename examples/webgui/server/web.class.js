@@ -1,9 +1,9 @@
 /**
- *
- * Web 'Prototype Class'
- *
- * @author Jimmy Aupperlee <jimmy@codeprogressive.com>
+ * Web Gui example
+ * This example starts a http server at port 8080
+ * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
  */
+
 
 'use strict';
 
