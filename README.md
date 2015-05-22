@@ -18,7 +18,7 @@ Coming soon ...
 Examples
 ------------
 
-Examples are included in the [examples folder](https://github.com/ShaPOC/node-muse/tree/master/src/examples/webgui).
+Examples are included in the [examples folder](https://github.com/ShaPOC/node-muse/tree/master/examples).
 
 License 
 ------------

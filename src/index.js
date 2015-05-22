@@ -56,7 +56,7 @@ var obj = {
 
             // Destroy the osc connection, it will be rebuilt
             // once there's a new connection
-            osc.destroy();
+            obj.OSC.destroy();
         });
 
 

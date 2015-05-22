@@ -1,6 +1,6 @@
 {
   "name": "node-muse",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "The unofficial OSC message receiver for the Muse Brainwave Band made with Node.JS",
   "main": "src/index.js",
   "scripts": {
