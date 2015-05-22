@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ShaPOC/node-muse/tree/master/src/examples/webgui"
+    "url": "https://github.com/ShaPOC/node-muse/tree/master/examples/webgui"
   },
   "author": "Jimmy Aupperlee <j.aup.gt@gmail.com>",
   "license": "GPLv3",
