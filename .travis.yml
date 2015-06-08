@@ -3,6 +3,7 @@ node_js:
   - "0.10"
 before_install:
   - npm install -g grunt-cli
+  - chmod a+x bin/install_muse.sh
   - bin/install_muse.sh
 install: npm install
 script: grunt
