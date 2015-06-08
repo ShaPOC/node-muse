@@ -70,8 +70,10 @@ describe("Muse initialize through the init function:", function() {
 
     it("should fix the options object when set incorrectly.", function() {
         Muse.init({"not": "a", "valid":"argument"});
-        var spawnArgs = Muse.childspawn.spawnargs[2].replace("osc.udp://", "").split(":");
-        expect(spawnArgs[0] === "127.0.0.1" && spawnArgs[1] === "5002").toBe(true);
+        if(typeof Muse.childspawn.spawnargs !== "undefined") {
+            var spawnArgs = Muse.childspawn.spawnargs[2].replace("osc.udp://", "").split(":");
+            expect(spawnArgs[0] === "127.0.0.1" && spawnArgs[1] === "5002").toBe(true);
+        }
     });
 });
 
