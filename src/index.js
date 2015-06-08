@@ -1,6 +1,13 @@
 /**
- * Node Muse Module entry point
- * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  Node Muse
+ *
+ *  Module entry point
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.0.1
  */
 
 'use strict';
@@ -23,6 +30,7 @@ var obj = {
 
     Muse: new museClass(),
     OSC: new oscClass(),
+    debug: true,
 
     connect : function(host, port) {
 
@@ -30,19 +38,29 @@ var obj = {
         host = host || "127.0.0.1";
         port = port || "5002";
 
+        // Set the debug bool inside the object
+        obj.Muse.debug = obj.debug;
+        obj.OSC.debug = obj.debug;
+
         /*
          |--------------------------------------------------------------------------
          | Let the muse and the osc communicate with each other
          |--------------------------------------------------------------------------
          */
+        // Bind the osc data event to the the muse class
+        obj.OSC.on('data', function(data, info, raw){
+            // We use an anonymous function to make sure
+            // we don't compromise the this value
+            obj.Muse.setData(data, info, raw);
+        });
+
+        /*
+         |--------------------------------------------------------------------------
+         | Now make sure that when the Muse is connected the OSC starts giving data
+         |--------------------------------------------------------------------------
+         */
         obj.Muse.on('connected', function(options){
 
-            // Bind the osc data event to the the muse class
-            obj.OSC.on('data', function(data, info, raw){
-                // We use an anonymous function to make sure
-                // we don't compromise the this value
-                obj.Muse.setData(data, info, raw)
-            });
             // Start the osc
             obj.OSC.init(options);
         });
@@ -59,7 +77,6 @@ var obj = {
             obj.OSC.destroy();
         });
 
-
         /*
          |--------------------------------------------------------------------------
          | Start the muse
@@ -73,6 +90,13 @@ var obj = {
         // Return the object so you create a chain
         // E.G. require("node-muse").connect().Muse
         return obj;
+    },
+
+    disconnect : function() {
+
+        // Destroying both, should be enough
+        obj.Muse.destroy();
+        obj.OSC.destroy();
     }
 };
 

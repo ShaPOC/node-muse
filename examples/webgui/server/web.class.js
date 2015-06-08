@@ -1,9 +1,15 @@
 /**
- * Web Gui example
- * This example starts a http server at port 8080
- * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  Node Muse
+ *  Web Gui example
+ *
+ *  This example starts a http server at port 8080
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.1.0
  */
-
 
 'use strict';
 

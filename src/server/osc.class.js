@@ -1,8 +1,14 @@
 /**
- * OSC Prototype Object
- * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  Node Muse
+ *
+ *  OSC Prototype Object
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.0.1
  */
-
 
 'use strict';
 
@@ -23,9 +29,8 @@ var osc          = require('osc'),
  */
 var oscClass = function() {
     // Set some defaults
-    this.host = "127.0.0.1";
-    this.port = 5002;
     this.udpPort = null;
+    this.debug = true;
 };
 // Inherit the eventemitter super class
 util.inherits(oscClass, EventEmitter);
@@ -40,25 +45,40 @@ util.inherits(oscClass, EventEmitter);
  */
 oscClass.prototype.init = function(options) {
 
-    this.host = options.host;
-    this.port = options.port;
+    // Set default options if none are set
+    options = options || {
+        host : "127.0.0.1",
+        port : 5002
+    };
+
+    // If an options object is set, check if it's valid
+    if(typeof options !== "object") {
+        throw new Error("init(): First arg must be an object containing a host and / or port key.");
+    }
+
+    // Make sure all options required are set
+    options.host = options.host || "127.0.0.1";
+    options.port = options.port || 5002;
+    options.port = parseInt(options.port);
     
     var self = this;
 
     // Create an osc.js UDP connection
     this.udpPort = new osc.UDPPort({
-        localAddress: this.host,
-        localPort: this.port
+        localAddress: options.host,
+        localPort: options.port
     });
 
     // Listen for incoming OSC bundles.
     this.udpPort.on("data", function (data, info) {
-        self.emit("data", osc.readMessage(data), info, data)
+        self.emit("data", osc.readMessage(data), info, data);
     });
 
     this.udpPort.on("ready", function(){
         self.emit("ready");
-        console.log("OSC connection opened at: " + self.host + ":" + self.port);
+        if(self.debug) {
+            console.log("OSC connection opened at: " + self.host + ":" + self.port);
+        }
     });
 
     // Open the socket.
@@ -76,8 +96,10 @@ oscClass.prototype.init = function(options) {
 oscClass.prototype.destroy = function() {
 
     // Close it
-    this.udpPort.close();
-    this.udpPort = null;
+    if(this.udpPort !== null) {
+        this.udpPort.close();
+        this.udpPort = null;
+    }
 };
 
 // Export the module!

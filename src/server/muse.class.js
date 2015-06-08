@@ -1,8 +1,14 @@
 /**
- * Muse Prototype Object
- * @author Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  Node Muse
+ *
+ *  Muse Prototype Object
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.0.1
  */
-
 
 'use strict';
 
@@ -14,7 +20,9 @@
 
 var spawn        = require('child_process').spawn,
     util         = require('util'),
-    EventEmitter = require('events').EventEmitter;
+    EventEmitter = require('events').EventEmitter,
+    // Kill is used to slay the child process if needed
+    kill         = require('tree-kill');
 
 /*
  |--------------------------------------------------------------------------
@@ -23,9 +31,11 @@ var spawn        = require('child_process').spawn,
  */
 var museClass = function() {
 
+    this.childspawn = null;
     this.connected = false;
     this.uncertain = false;
     this.config = null;
+    this.debug = true;
 };
 // Inherit the eventemitter super class
 util.inherits(museClass, EventEmitter);
@@ -52,9 +62,17 @@ util.inherits(museClass, EventEmitter);
  */
 museClass.prototype.setData = function(data, info, raw) {
 
-    if(data.address === "/muse/config") {
-        this.config = eval('(' + data.args + ')');
-        return true;
+    // Check if the data object inserted is any good
+    // We AT LEAST need an address inside the data object
+    if(typeof data !== "object" || !data.address) {
+        throw new Error("setData(): First arg must be an object containing an address key.");
+    }
+
+    // When no extra information is applied, just make it an object.
+    info = info || {};
+
+    if(this.config === null && data.address === "/muse/config") {
+        this.config = JSON.parse(data.args);
     }
 
     // Emit the event
@@ -80,13 +98,32 @@ museClass.prototype.setData = function(data, info, raw) {
  */
 museClass.prototype.init = function(options) {
 
+    // Set default options if none are set
+    options = options || {
+        host : "127.0.0.1",
+        port : "5002"
+    };
+
+    // If an options object is set, check if it's valid
+    if(typeof options !== "object") {
+        throw new Error("init(): First arg must be an object containing a host and / or port key.");
+    }
+
+    // Set default options if they are not set
+    options.host = options.host || "127.0.0.1";
+    options.port =  options.port || "5002";
+
     var connectionString = 'osc.udp://' + options.host + ':' + options.port,
-        child = spawn('muse-io', ['--osc', connectionString ]),
         self = this;
 
-    console.log("Connecting to any available Muse using host; " + connectionString);
+    // Set the spawn in the object
+    self.childspawn = spawn('muse-io', ['--osc', connectionString ]);
 
-    child.stdout.on('data', function(data) {
+    if(self.debug) {
+        console.log("Connecting to any available Muse using host; " + connectionString);
+    }
+
+    self.childspawn.stdout.on('data', function(data) {
 
         // It's already connected so don't bother doing anything else but
         // check for a disconnect
@@ -94,6 +131,8 @@ museClass.prototype.init = function(options) {
 
             if(data.toString('utf8').indexOf('bits/second: 0') > -1 && !this.uncertain) {
                 self.uncertain = true;
+                // Chances are a new Muse will connect, wait for new configs!
+                self.config = null;
                 self.emit('uncertain');
             } else {
                 self.uncertain = false;
@@ -102,7 +141,9 @@ museClass.prototype.init = function(options) {
             if(data.toString('utf8').indexOf('failure') > -1) {
                 self.connected = false;
                  // Send out a message
-                console.log("The Muse got disconnected!");
+                if(self.debug) {
+                    console.log("The Muse got disconnected!");
+                }
                 self.emit('disconnected');
             }
             return false;
@@ -112,24 +153,50 @@ museClass.prototype.init = function(options) {
         if(data.toString('utf8').indexOf("Connected") > -1) {
             self.connected = true;
             // Send out a message
-            console.log("Succesfully connected to the Muse!");
+            if(self.debug){
+                console.log("Succesfully connected to the Muse!");
+            }
             // Send out a connected notice!
             self.emit('connected', options);
         }
     });
 
-    child.stderr.on('data', function(data) {
+    self.childspawn.stderr.on('data', function(data) {
         // TODO: catch errors
-        console.log(data);
+        if(self.debug){
+            console.log(data);
+        }
     });
 
     // On unexpected close
-    child.on('close', function(data) {
+    self.childspawn.on('close', function(data) {
         // TODO: Catch unexpected close
-        console.log(data);
-        // Restart the server?
+        if(self.debug){
+            console.log(data);
+        }
+        // Restart the server? Hmmm.. perhaps...
         // self.init();
     });
+};
+
+/*
+ |--------------------------------------------------------------------------
+ | Uninitialize or destroy
+ |--------------------------------------------------------------------------
+ |
+ | Empty out the object and destroy the child spawn
+ |
+ */
+museClass.prototype.destroy = function() {
+
+    if(this.childspawn !== null) {
+        // Destroy it forcefully
+        this.childspawn.kill('SIGHUP');
+        kill(this.childspawn.pid);
+        // Reset the variables
+        this.childspawn = null;
+    }
+    this.config = null;
 };
 
 // Export the module!

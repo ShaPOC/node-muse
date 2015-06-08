@@ -1,6 +1,6 @@
 {
   "name": "node-muse",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "An event driven OSC message receiver for the Muse Brainwave Band made with Node.JS.",
   "main": "src/index.js",
   "scripts": {
@@ -23,6 +23,12 @@
   },
   "homepage": "https://github.com/ShaPOC/node-muse",
   "dependencies": {
-    "osc": "^1.1.0"
+    "osc": "^1.1.0",
+    "tree-kill": "^0.1.1"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-jasmine-node-new": "^0.3.2"
   }
 }

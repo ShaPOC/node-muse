@@ -1,4 +1,19 @@
 /**
+ *  Node Muse
+ *  Web Gui example
+ *
+ *  This is the frontend socket script connecting to the
+ *  backend server and subscribing to its information.
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.1.0
+ */
+
+
+/**
  * Quick settings
  */
 

@@ -1,3 +1,17 @@
+/**
+ *  Node Muse
+ *  Web Gui example
+ *
+ *  Some small modifications to bootflat
+ *  ---------------------------------------------------
+ *  @package    node-muse
+ *  @author     Jimmy Aupperlee <j.aup.gt@gmail.com>
+ *  @license    GPLv3
+ *  @version    1.0.0
+ *  @since      File available since Release 0.1.0
+ */
+
+
 body {
     background-color: #2a2d37;
 }
