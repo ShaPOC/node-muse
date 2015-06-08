@@ -5,8 +5,10 @@ type muse-io >/dev/null 2>&1 || {
 
     # If not, try to install it
     echo >&2 "muse-io binary not found, trying to install it...";
+    echo >&2 "downloading muse-io installer...";
     wget http://storage.googleapis.com/ix_downloads/musesdk-3.4.1/musesdk-3.4.1-linux-installer.run;
     chmod a+x musesdk-3.4.1-linux-installer.run;
+    echo >&2 "running muse-io installer...";
     ./musesdk-3.4.1-linux-installer.run;
     rm -rf install.sh;
 
