@@ -4,10 +4,7 @@ node_js:
 sudo: required
 before_install:
   - npm install -g grunt-cli
-  - wget http://storage.googleapis.com/ix_downloads/musesdk-3.4.1/musesdk-3.4.1-linux-installer.run
-  - chmod a+x musesdk-3.4.1-linux-installer.run
-  - ./musesdk-3.4.1-linux-installer.run
-  - rm -rf install.sh
+  - chmod a+x bin/install_muse.sh
   - sudo bin/install_muse.sh
 install: npm install
 script: grunt

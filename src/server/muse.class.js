@@ -168,14 +168,6 @@ museClass.prototype.init = function(options) {
         }
     });
 
-    // On unexpected error
-    self.childspawn.on('error', function(data) {
-        // TODO: Catch unexpected error
-        if(self.debug){
-            console.log(data);
-        }
-    });
-
     // On unexpected close
     self.childspawn.on('close', function(data) {
         // TODO: Catch unexpected close
