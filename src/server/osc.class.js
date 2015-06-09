@@ -63,7 +63,7 @@ oscClass.prototype.init = function(options) {
     
     var self = this;
 
-    // Create an osc.js UDP connection
+    // Create an osc.js UDP connection to receive incoming OSC data
     this.udpPort = new osc.UDPPort({
         localAddress: options.host,
         localPort: options.port
@@ -71,13 +71,26 @@ oscClass.prototype.init = function(options) {
 
     // Listen for incoming OSC bundles.
     this.udpPort.on("data", function (data, info) {
-        self.emit("data", osc.readMessage(data), info, data);
+
+        // Prepare an error for when the try catch fails, inside the try this variable will get overridden
+        var receivedData = {
+            address : "error",
+            args : ["The header of an OSC packet didn't contain an OSC address or a #bundle string"]
+        };
+        try {
+            receivedData = osc.readMessage(data);
+        } catch(e) {
+            if(self.debug) {
+                console.log(e);
+            }
+        }
+        self.emit("data", receivedData, info, data);
     });
 
     this.udpPort.on("ready", function(){
         self.emit("ready");
         if(self.debug) {
-            console.log("OSC connection opened at: " + self.host + ":" + self.port);
+            console.log("OSC connection opened at: " + options.host + ":" + options.port);
         }
     });
 
