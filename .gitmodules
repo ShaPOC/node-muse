@@ -1,0 +1,3 @@
+[submodule "examples/virtual-reality-sickness-muse"]
+	path = examples/virtual-reality-sickness-muse
+	url = https://github.com/ShaPOC/virtual-reality-sickness-muse
